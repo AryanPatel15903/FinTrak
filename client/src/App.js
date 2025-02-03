@@ -5,6 +5,7 @@ import Login from "./components/Login";
 import Layout from "./components/Layout";
 import Dashboard from "./components/pages/Dashboard";
 import ExpenseForm from "./components/pages/ExpenseForm";
+import MyExpenses from "./components/pages/MyExpenses";
 
 function App() {
 	const user = localStorage.getItem("token");
@@ -19,6 +20,7 @@ function App() {
               {user && <Route index element={<Dashboard />} />}
 			  <Route path="/" element={<Navigate replace to="/login" />} />
 			  <Route path="/expenses/new" exact element={<ExpenseForm />} />
+			  <Route path="/expenses" exact element={<MyExpenses />} />
 			</Route>
 			
 		</Routes>

@@ -1,58 +1,58 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-// import { useAuth } from '../context/AuthContext';
-// import { toast } from 'react-hot-toast';
-// import { supabase } from '../lib/supabase';
+import axios from 'axios';
 
 export default function ExpenseForm() {
-//   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+
+  // Set the formData with default status as 'pending' but don't display status in the form
   const [formData, setFormData] = useState({
     amount: '',
     date: new Date().toISOString().split('T')[0],
     category_id: '',
     vendor: '',
     notes: '',
+    status: 'pending', // Set status as 'pending' by default
   });
 
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     if (!user) return;
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token'); // Assuming the JWT token is stored in localStorage
 
-//     setLoading(true);
-//     try {
-//       const { error } = await supabase.from('expenses').insert({
-//         user_id: user.id,
-//         amount: parseFloat(formData.amount),
-//         date: formData.date,
-//         category_id: formData.category_id,
-//         vendor: formData.vendor,
-//         notes: formData.notes,
-//       });
+      // Make a POST request to submit the form data, with status defaulting to 'pending'
+      const response = await axios.post('http://localhost:8080/api/expenses/submit', formData, {
+        headers: {
+          'x-auth-token': token, // Pass JWT token in the headers
+        },
+      });
 
-//       if (error) throw error;
+      // Handle success response
+      console.log(response.data.message);
+      navigate('/');
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to submit expense');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-//       toast.success('Expense submitted successfully');
-//       navigate('/');
-//     } catch (error) {
-//       console.error('Error:', error);
-//       toast.error('Failed to submit expense');
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
+  // Handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
     <div className="max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Submit New Expense</h1>
       
-      <form  className="bg-white rounded-lg shadow p-6 space-y-6">
+      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
