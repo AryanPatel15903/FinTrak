@@ -31,7 +31,7 @@ router.post("/", async (req, res) => {
 router.get('/me', auth, async (req, res) => {
 	try {
 	  const user = await User.findById(req.user._id)
-							.select('-password'); // Populate the subscription details
+							.select('-password'); 
 	  if (!user) {
 		return res.status(404).send({ message: 'User not found' });
 	  }

@@ -33,7 +33,6 @@ useEffect(() => {
       });
 
       setUserData(data);
-      console.log(data);
       setIsLoggedIn(true);
 
       
