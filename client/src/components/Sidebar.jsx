@@ -15,26 +15,26 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className="w-64 bg-white shadow-sm min-h-screen">
+    <div className="w-64 bg-white shadow-md border-r border-gray-100 min-h-screen">
       <nav className="mt-8 px-4">
-        <div className="space-y-1">
+        <div className="space-y-2">
           {links.map((link) => {
             const Icon = link.icon;
             return (
               <Link
                 key={link.to}
                 to={link.to}
-                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                className={`group flex items-center px-4 py-3 rounded-lg transition-all duration-200 ease-in-out ${
                   isActive(link.to)
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    ? 'bg-blue-100 text-blue-700 font-semibold'
+                    : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
                 }`}
               >
                 <Icon
                   className={`mr-3 h-5 w-5 ${
                     isActive(link.to)
-                      ? 'text-blue-600'
-                      : 'text-gray-400 group-hover:text-gray-500'
+                      ? 'text-blue-700'
+                      : 'text-gray-400 group-hover:text-blue-500'
                   }`}
                 />
                 {link.label}

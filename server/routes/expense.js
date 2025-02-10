@@ -54,6 +54,32 @@ router.get('/pendingcount', auth, async (req, res) => {
   }
 });
 
+// GET endpoint to fetch approved expenses count for the logged-in user
+router.get('/approvedcount', auth, async (req, res) => {
+  try {
+    const approvedCount = await Expense.countDocuments({ 
+      user_id: req.user._id, 
+      status: 'approved' 
+    });
+    res.status(200).json({ count: approvedCount });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching approved expenses count' });
+  }
+});
+
+// GET endpoint to fetch rejected expenses count for the logged-in user
+router.get('/rejectedcount', auth, async (req, res) => {
+  try {
+    const rejectedCount = await Expense.countDocuments({ 
+      user_id: req.user._id, 
+      status: 'rejected' 
+    });
+    res.status(200).json({ count: rejectedCount });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching rejected expenses count' });
+  }
+});
+
 // GET API to fetch the last 5 recent expenses for the logged-in user
 router.get('/recent', auth, async (req, res) => {
   try {

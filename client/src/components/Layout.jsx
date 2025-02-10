@@ -1,27 +1,21 @@
-import React from 'react';
-import { Outlet, Navigate } from 'react-router-dom';
-// import { useAuth } from '../context/AuthContext';
-import Navbar from './Navbar';
-import Sidebar from './Sidebar';
+import { Navigate } from "react-router-dom";
+import Navbar from "./Navbar";
+import Sidebar from "./Sidebar";
+import { Outlet } from "react-router-dom";
 
 export default function Layout() {
-//   const { user, loading } = useAuth();
-const user = localStorage.getItem("token");
-
-//   if (loading) {
-//     return <div>Loading...</div>;
-//   }
+  const user = localStorage.getItem("token");
 
   if (!user) {
     return <Navigate to="/login" />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
       <Navbar />
       <div className="flex">
         <Sidebar />
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-8 bg-white shadow-sm rounded-lg m-4 overflow-hidden">
           <Outlet />
         </main>
       </div>
