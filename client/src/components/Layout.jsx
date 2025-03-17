@@ -7,7 +7,7 @@ export default function Layout() {
   const user = localStorage.getItem("token");
 
   if (!user) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/home" />;
   }
 
   return (

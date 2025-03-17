@@ -95,7 +95,7 @@ export default function ExpenseForm() {
         position: 'top-right',
         icon: '✅'
       });
-      navigate('/');
+      // navigate('/');
     } catch (error) {
       console.error('Error:', error);
       toast.error('Failed to submit expense', { // Show error notification

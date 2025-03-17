@@ -9,6 +9,10 @@ import MyExpenses from "./components/pages/MyExpenses";
 import AdminDashboard from "./components/pages/AdminDashboard";
 import ManagerDashboard from "./components/pages/ManagerDashboard";
 import EmployeeExpenses from "./components/pages/EmployeeExpenses";
+import Homepage from "./components/Homepage"; // Import the new Homepage component
+import FeaturesPage from "./components/FeaturesPage";
+import PricingPage from './components/PricingPage';
+import AboutPage from './components/AboutPage';
 
 // Protected Route Component
 const ProtectedRoute = () => {
@@ -16,14 +20,13 @@ const ProtectedRoute = () => {
     const userRole = localStorage.getItem("userRole");
 
     if (!token || !userRole) {
-        return <Navigate to="/login" replace />;
+        return <Navigate to="/home" replace />;
     }
 
     return <Outlet />;
 };
 
 function App() {
-    // const token = localStorage.getItem("token");
     const userRole = localStorage.getItem("userRole");
 
     const getDashboardByRole = () => {
@@ -41,6 +44,11 @@ function App() {
 
     return (
         <Routes>
+            <Route path="/home" element={<Homepage />} /> {/* Add the homepage route */}
+            <Route path="/features" element={<FeaturesPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
             
@@ -48,17 +56,17 @@ function App() {
             <Route element={<ProtectedRoute />}>
                 <Route path="/" element={<Layout />}>
                     <Route index element={getDashboardByRole()} />
-                    <Route path="/expenses/new" element={<ExpenseForm />} />
-                    <Route path="/expenses" element={<MyExpenses />} />
+                    <Route path="expenses/new" element={<ExpenseForm />} /> {/* Changed to relative path */}
+                    <Route path="expenses" element={<MyExpenses />} /> {/* Changed to relative path */}
                     
                     {userRole === 'admin' && (
-                        <Route path="/admin" element={<AdminDashboard />} />
+                        <Route path="admin" element={<AdminDashboard />} />
                     )}
                     
                     {userRole === 'manager' && (
                         <>
-                            <Route path="/manager" element={<ManagerDashboard />} />
-                            <Route path="/manager/employee/:employeeId/expenses" element={<EmployeeExpenses />} />
+                            <Route path="manager" element={<ManagerDashboard />} /> {/* Changed to relative path */}
+                            <Route path="manager/employee/:employeeId/expenses" element={<EmployeeExpenses />} /> {/* Changed to relative path */}
                         </>
                     )}
                 </Route>

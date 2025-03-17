@@ -70,7 +70,7 @@ export default function Navbar() {
             </div>
           ) : (
             <Link 
-              to="/login" 
+              to="/home" 
               className="text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-md transition-colors"
             >
               Login
