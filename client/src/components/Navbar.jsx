@@ -3,10 +3,13 @@ import { Link } from 'react-router-dom';
 import { Wallet, LogOut } from 'lucide-react';
 import { useState,useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 
 export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -34,7 +37,9 @@ export default function Navbar() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    window.location.reload();
+    localStorage.removeItem("userRole");
+    // window.location.reload();
+    navigate('/home');
   };
 
   return (

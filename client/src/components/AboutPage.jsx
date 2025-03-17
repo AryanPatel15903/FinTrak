@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Wallet, Users, Building, Award, Target, Globe, CheckCircle, ArrowRight } from 'lucide-react';
+import { Users, Building, Award, Target, Globe, CheckCircle, ArrowRight } from 'lucide-react';
 
 const AboutPage = () => {
   return (

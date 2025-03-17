@@ -12,9 +12,9 @@ import {
   FaUsers,
   FaGlobe,
   FaExchangeAlt,
-  FaDatabase
+  // FaDatabase
 } from "react-icons/fa";
-import { Wallet, ArrowRight, CheckCircle, Zap, CloudUpload, BarChart4, RefreshCw } from 'lucide-react';
+import { Wallet, ArrowRight, CheckCircle, CloudUpload, BarChart4 } from 'lucide-react';
 
 const FeaturesPage = () => {
   return (
