@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Expense = require('../models/Expense');
 const auth = require('../middleware/authMiddleware');
+const nodemailer = require('nodemailer');
+const {User} = require("../models/user");
 
 // Create a new expense (POST request)
 router.post('/submit', auth, async (req, res) => {
@@ -13,6 +15,12 @@ router.post('/submit', auth, async (req, res) => {
   }
 
   try {
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
     // Create a new expense with submission_date automatically set and status defaulting to 'pending' if not provided
     const newExpense = new Expense({
       user_id: req.user._id, // Get user id from the authenticated token
@@ -24,12 +32,40 @@ router.post('/submit', auth, async (req, res) => {
       status: status || 'pending', // Set status, default to 'pending' if not provided
     });
 
-    // Save the expense to the database
+    // // Save the expense to the database
     const savedExpense = await newExpense.save();
-    
-    res.status(201).json({ message: 'Expense submitted successfully', data: savedExpense });
+
+    // Set up nodemailer transporter
+    const transporter = nodemailer.createTransport({
+      service: 'gmail', // Use any email provider, here it's Gmail
+      auth: {
+        user: 'aryanpatel15903@gmail.com', // Your email
+        pass: 'ttpvmhhioydlkigx', // Your email password or app-specific password
+      },
+    });
+
+    // Compose email
+    const mailOptions = {
+      from: 'aryanpatel15903@gmail.com', // Sender email address
+      to: user.email, // User's email, assuming it's in the authenticated token
+      subject: 'Expense Submitted Successfully',
+      text: `Hello, Your expense has been submitted successfully. Details:
+             - Amount: ${amount}
+             - Vendor: ${vendor}
+             - Date: ${date}
+             - Status: ${status || 'pending'}
+        Thank you!`,
+    };
+
+    // Send email
+    await transporter.sendMail(mailOptions);
+  
+    // Respond to the client
+    res.status(201).json({ message: 'Expense submitted and email sent successfully', data: savedExpense });
   } catch (error) {
     res.status(500).json({ message: 'Error submitting expense', error });
+    console.log("User: ",req.user);
+    console.log("Error: ", error);
   }
 });
 
@@ -95,8 +131,6 @@ router.get('/recent', auth, async (req, res) => {
     res.status(500).json({ message: 'Error fetching recent expenses' });
   }
 });
-
-
 
 
 module.exports = router;
