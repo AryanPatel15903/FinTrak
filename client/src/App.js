@@ -13,6 +13,7 @@ import Homepage from "./components/Homepage"; // Import the new Homepage compone
 import FeaturesPage from "./components/FeaturesPage";
 import PricingPage from './components/PricingPage';
 import AboutPage from './components/AboutPage';
+import Mistral from './components/pages/Mistral_Testing';
 
 // Protected Route Component
 const ProtectedRoute = () => {
@@ -48,6 +49,7 @@ function App() {
             <Route path="/features" element={<FeaturesPage />} />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/mistral" element={<Mistral />} />
             
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />

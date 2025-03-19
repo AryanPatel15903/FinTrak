@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import Tesseract from 'tesseract.js';
-import { ToastContainer, toast } from 'react-toastify'; // Import toast from react-toastify
-import 'react-toastify/dist/ReactToastify.css';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import Tesseract from "tesseract.js";
+import { ToastContainer, toast } from "react-toastify"; // Import toast from react-toastify
+import "react-toastify/dist/ReactToastify.css";
+// import OpenAI from "openai";
+import { Mistral } from "@mistralai/mistralai";
+
+const apiKey = "hiirJwgJlEBEXxj7SlGS7fAsr27wocwr";
 
 export default function ExpenseForm() {
   const navigate = useNavigate();
@@ -12,13 +16,14 @@ export default function ExpenseForm() {
   const [filePreview, setFilePreview] = useState(null);
   const [ocrLoading, setOcrLoading] = useState(false); // Add state for OCR loading
   const [formData, setFormData] = useState({
-    amount: '',
-    date: new Date().toISOString().split('T')[0],
-    category_id: '',
-    vendor: '',
-    notes: '',
-    status: 'pending',
+    amount: "",
+    date: new Date().toISOString().split("T")[0],
+    category_id: "",
+    vendor: "",
+    notes: "",
+    status: "pending",
   });
+  // const [ocrData, setOcrData] = useState(null); // data from image
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -35,72 +40,95 @@ export default function ExpenseForm() {
 
   const processOCR = (file) => {
     setOcrLoading(true);
-    Tesseract.recognize(
-      file,
-      'eng',
-      {
-        logger: (m) => console.log(m),
-      }
-    ).then(({ data: { text } }) => {
-      console.log(text);
-      // Extract data from OCR text and update form fields
-      // const extractedData = extractDataFromText(text);
-      // setFormData((prev) => ({ ...prev, ...extractedData }));
-      setOcrLoading(false);
-    }).catch((error) => {
-      console.error('Error processing OCR:', error);
-      setOcrLoading(false);
-    });
+    Tesseract.recognize(file, "eng", {
+      logger: (m) => console.log(m),
+    })
+      .then(({ data: { text } }) => {
+        console.log(text);
+        // setOcrData(text);
+        // Pass the OCR text directly to the GPT processing function
+        processReceiptWithGPT(text).then((data) => {
+          // Parse and use the extracted data to populate the form fields
+          setFormData({ amount: data.amount, vendor: data.vendor });
+        });
+        setOcrLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error processing OCR:", error);
+        setOcrLoading(false);
+      });
   };
 
-  // const extractDataFromText = (text) => {
-  //   // Implement logic to extract amount, date, category, vendor, and notes from OCR text
-  //   // This is a simple example and may need to be adjusted based on the actual text format
-  //   const amountMatch = text.match(/Total Amount:\s*\$?(\d+(\.\d{2})?)/i); // Adjusted regex to match "Total Amount"
-  //   const dateMatch = text.match(/Date:\s*(\d{4}-\d{2}-\d{2})/i);
-  //   const vendorMatch = text.match(/Vendor:\s*(\w+)/i);
-  //   const notesMatch = text.match(/Notes:\s*(.*)/i);
+  const processReceiptWithGPT = async (ocrText) => {
+    const client = new Mistral({
+      apiKey: apiKey,
+    });
+    const chatResponse = await client.chat.complete({
+      model: "mistral-small-latest",
+      messages: [
+        {
+          role: "user",
+          content: `The following is a receipt text: ${ocrText}
+        Please extract the following fields:
+        - Vendor Name
+        - Total net Amount after tax
+          and give me output in json format where the keys are vendor, amount
+          only give output as json no any other text`,
+        },
+      ],
+    });
+    
 
-  //   return {
-  //     amount: amountMatch ? amountMatch[1] : '',
-  //     date: dateMatch ? dateMatch[1] : new Date().toISOString().split('T')[0],
-  //     vendor: vendorMatch ? vendorMatch[1] : '',
-  //     notes: notesMatch ? notesMatch[1] : '',
-  //   };
-  // };
+    console.log("JSON:", chatResponse.choices[0].message.content);
+    const aiOutput = chatResponse.choices[0].message.content;
+
+    // console.log(chatResponse);
+    let jsonStart = aiOutput.indexOf('{');
+    let jsonEnd = aiOutput.lastIndexOf('}');
+    
+    // Step 2: Extract the JSON part of the string
+    let jsonString = aiOutput.substring(jsonStart, jsonEnd + 1);
+
+    // console.log(jsonString);
+    
+    let jsonData = JSON.parse(jsonString);
+
+    console.log(jsonData);
+    
+
+    return jsonData;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-// const formDataWithFile = new FormData();
-// formDataWithFile.append('file', file);
-// formDataWithFile.append('amount', formData.amount);
-// formDataWithFile.append('date', formData.date);
-// formDataWithFile.append('category_id', formData.category_id);
-// formDataWithFile.append('vendor', formData.vendor);
-// formDataWithFile.append('notes', formData.notes);
-// formDataWithFile.append('status', formData.status);
+      const token = localStorage.getItem("token");
 
-      const response = await axios.post('http://localhost:8080/api/expenses/submit', formData, {
-        headers: {
-          'x-auth-token': token,
-//           'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await axios.post(
+        "http://localhost:8080/api/expenses/submit",
+        formData,
+        {
+          headers: {
+            "x-auth-token": token,
+            //           'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
 
       console.log(response.data.message);
-      toast.success('Expense submitted successfully!', { // Show success notification
-        position: 'top-right',
-        icon: '✅'
+      toast.success("Expense submitted successfully!", {
+        // Show success notification
+        position: "top-right",
+        icon: "✅",
       });
       // navigate('/');
     } catch (error) {
-      console.error('Error:', error);
-      toast.error('Failed to submit expense', { // Show error notification
-        position: 'top-right',
-        icon: '❌'
+      console.error("Error:", error);
+      toast.error("Failed to submit expense", {
+        // Show error notification
+        position: "top-right",
+        icon: "❌",
       });
     } finally {
       setLoading(false);
@@ -115,17 +143,30 @@ export default function ExpenseForm() {
   return (
     <div className="max-w-5xl mx-auto p-4">
       <ToastContainer />
-      <h1 className="text-3xl font-bold mb-6 text-center">Submit New Expense</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">
+        Submit New Expense
+      </h1>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-8 space-y-6">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white rounded-lg shadow p-8 space-y-6"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="flex flex-col items-center justify-center h-full">
             {filePreview ? (
               <div className="relative w-full h-full">
-                {file.type.startsWith('image/') ? (
-                  <img src={filePreview} alt="Preview" className="max-h-full w-full object-contain" />
+                {file.type.startsWith("image/") ? (
+                  <img
+                    src={filePreview}
+                    alt="Preview"
+                    className="max-h-full w-full object-contain"
+                  />
                 ) : (
-                  <embed src={filePreview} type={file.type} className="h-full w-full object-contain" />
+                  <embed
+                    src={filePreview}
+                    type={file.type}
+                    className="h-full w-full object-contain"
+                  />
                 )}
                 <button
                   type="button"
@@ -139,7 +180,10 @@ export default function ExpenseForm() {
                 </button>
               </div>
             ) : (
-              <label htmlFor="file-upload" className="cursor-pointer flex flex-col justify-center items-center h-full w-full border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-blue-500 hover:text-blue-500">
+              <label
+                htmlFor="file-upload"
+                className="cursor-pointer flex flex-col justify-center items-center h-full w-full border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-blue-500 hover:text-blue-500"
+              >
                 <span className="text-4xl">+</span>
                 <span className="text-sm">Upload a new Expense</span>
                 <input
@@ -152,12 +196,17 @@ export default function ExpenseForm() {
                 />
               </label>
             )}
-            {file && <span className="mt-2 text-sm text-gray-600">{file.name}</span>}
+            {file && (
+              <span className="mt-2 text-sm text-gray-600">{file.name}</span>
+            )}
           </div>
 
           <div className="space-y-6">
             <div>
-              <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="amount"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Amount
               </label>
               <input
@@ -173,7 +222,10 @@ export default function ExpenseForm() {
             </div>
 
             <div>
-              <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="date"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Date
               </label>
               <input
@@ -188,7 +240,10 @@ export default function ExpenseForm() {
             </div>
 
             <div>
-              <label htmlFor="category_id" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="category_id"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Category
               </label>
               <select
@@ -209,7 +264,10 @@ export default function ExpenseForm() {
             </div>
 
             <div>
-              <label htmlFor="vendor" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="vendor"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Vendor
               </label>
               <input
@@ -224,7 +282,10 @@ export default function ExpenseForm() {
             </div>
 
             <div>
-              <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="notes"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Notes
               </label>
               <textarea
@@ -242,7 +303,7 @@ export default function ExpenseForm() {
         <div className="flex justify-end space-x-4">
           <button
             type="button"
-            onClick={() => navigate('/')}
+            onClick={() => navigate("/")}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             Cancel
@@ -252,7 +313,11 @@ export default function ExpenseForm() {
             disabled={loading || ocrLoading}
             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Submitting...' : ocrLoading ? 'Processing OCR...' : 'Submit Expense'}
+            {loading
+              ? "Submitting..."
+              : ocrLoading
+              ? "Processing OCR..."
+              : "Submit Expense"}
           </button>
         </div>
       </form>
