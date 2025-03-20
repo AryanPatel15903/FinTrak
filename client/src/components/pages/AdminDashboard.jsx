@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import PolicyManagement from './PolicyManagement';
 
 export default function AdminDashboard() {
   const [managerData, setManagerData] = useState({
@@ -102,7 +103,7 @@ export default function AdminDashboard() {
                   value={managerData.firstName}
                   onChange={handleChange}
                   required
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
               <div>
@@ -116,11 +117,9 @@ export default function AdminDashboard() {
                   value={managerData.lastName}
                   onChange={handleChange}
                   required
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                   Email
@@ -132,7 +131,7 @@ export default function AdminDashboard() {
                   value={managerData.email}
                   onChange={handleChange}
                   required
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
               <div>
@@ -146,7 +145,7 @@ export default function AdminDashboard() {
                   value={managerData.password}
                   onChange={handleChange}
                   required
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -201,6 +200,9 @@ export default function AdminDashboard() {
           )}
         </div>
       </div>
+
+      {/* Policy Management */}
+      <PolicyManagement />
     </div>
   );
 }

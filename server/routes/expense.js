@@ -4,6 +4,7 @@ const Expense = require('../models/Expense');
 const auth = require('../middleware/authMiddleware');
 const nodemailer = require('nodemailer');
 const {User} = require("../models/user");
+const Policy = require("../models/policy");
 
 // Create a new expense (POST request)
 router.post('/submit', auth, async (req, res) => {
@@ -19,6 +20,43 @@ router.post('/submit', auth, async (req, res) => {
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check policy rules
+    const policy = await Policy.findOne({ category: category_id });
+    
+    if (policy && amount > policy.limit) {
+      // Expense violates policy
+      const newExpense = new Expense({
+        user_id: req.user._id,
+        amount,
+        date,
+        category_id,
+        vendor,
+        notes,
+        status: 'rejected',
+      });
+      await newExpense.save();
+
+      // Send rejection email
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: 'aryanpatel15903@gmail.com',
+          pass: 'ttpvmhhioydlkigx',
+        },
+      });
+
+      const mailOptions = {
+        from: 'aryanpatel15903@gmail.com',
+        to: user.email,
+        subject: 'Expense Rejected Due to Policy Violation',
+        text: `Your expense for ${category_id} has been rejected because it exceeds the limit of ${policy.limit}.`,
+      };
+
+      await transporter.sendMail(mailOptions);
+
+      return res.status(201).json({ message: 'Expense rejected due to policy violation', expense: newExpense });
     }
 
     // Create a new expense with submission_date automatically set and status defaulting to 'pending' if not provided

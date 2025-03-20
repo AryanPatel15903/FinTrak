@@ -49,7 +49,11 @@ export default function ExpenseForm() {
         // Pass the OCR text directly to the GPT processing function
         processReceiptWithGPT(text).then((data) => {
           // Parse and use the extracted data to populate the form fields
-          setFormData({ amount: data.amount, vendor: data.vendor, category_id: data.category });
+          setFormData({
+            amount: data.amount,
+            vendor: data.vendor,
+            category_id: data.category,
+          });
         });
         setOcrLoading(false);
       })
@@ -78,24 +82,22 @@ export default function ExpenseForm() {
         },
       ],
     });
-    
 
     console.log("JSON:", chatResponse.choices[0].message.content);
     const aiOutput = chatResponse.choices[0].message.content;
 
     // console.log(chatResponse);
-    let jsonStart = aiOutput.indexOf('{');
-    let jsonEnd = aiOutput.lastIndexOf('}');
-    
+    let jsonStart = aiOutput.indexOf("{");
+    let jsonEnd = aiOutput.lastIndexOf("}");
+
     // Step 2: Extract the JSON part of the string
     let jsonString = aiOutput.substring(jsonStart, jsonEnd + 1);
 
     // console.log(jsonString);
-    
+
     let jsonData = JSON.parse(jsonString);
 
     console.log(jsonData);
-    
 
     return jsonData;
   };
@@ -118,11 +120,17 @@ export default function ExpenseForm() {
       );
 
       console.log(response.data.message);
-      toast.success("Expense submitted successfully!", {
-        // Show success notification
-        position: "top-right",
-        icon: "✅",
-      });
+      if (response.data.expense?.status === "rejected") {
+        toast.error(response.data.message, {
+          position: "top-right",
+          icon: "❌",
+        });
+      } else {
+        toast.success("Expense submitted successfully!", {
+          position: "top-right",
+          icon: "✅",
+        });
+      }
       // navigate('/');
     } catch (error) {
       console.error("Error:", error);
