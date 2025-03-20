@@ -49,7 +49,7 @@ export default function ExpenseForm() {
         // Pass the OCR text directly to the GPT processing function
         processReceiptWithGPT(text).then((data) => {
           // Parse and use the extracted data to populate the form fields
-          setFormData({ amount: data.amount, vendor: data.vendor });
+          setFormData({ amount: data.amount, vendor: data.vendor, category_id: data.category });
         });
         setOcrLoading(false);
       })
@@ -71,6 +71,7 @@ export default function ExpenseForm() {
           content: `The following is a receipt text: ${ocrText}
         Please extract the following fields:
         - Vendor Name
+        - Category (travel, meals, office, training, other) compulsory from given options
         - Total net Amount after tax
           and give me output in json format where the keys are vendor, amount
           only give output as json no any other text`,
