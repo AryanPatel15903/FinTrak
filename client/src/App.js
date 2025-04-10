@@ -15,6 +15,8 @@ import PricingPage from './components/PricingPage';
 import AboutPage from './components/AboutPage';
 import Mistral from './components/pages/Mistral_Testing';
 
+import AssignBudget from './components/pages/AssignBudget';
+
 // Protected Route Component
 const ProtectedRoute = () => {
     const token = localStorage.getItem("token");
@@ -62,7 +64,10 @@ function App() {
                     <Route path="expenses" element={<MyExpenses />} /> {/* Changed to relative path */}
                     
                     {userRole === 'admin' && (
-                        <Route path="admin" element={<AdminDashboard />} />
+                        <>
+                            <Route path="admin" element={<AdminDashboard />} />
+                            <Route path="/admin/assign-budget" element={<AssignBudget />} />
+                        </>
                     )}
                     
                     {userRole === 'manager' && (

@@ -14,6 +14,10 @@ import {
 } from "lucide-react";
 import FooterHomepage from "./FooterHomepage";
 
+const profile = require("./profile.png");
+const team = require("./team.jpg");
+
+
 const AboutPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -123,7 +127,7 @@ const AboutPage = () => {
           </h1>
           <p className="text-blue-100 text-xl max-w-3xl mx-auto mb-10">
             Simplifying expense management for businesses of all sizes since
-            2018.
+            2024.
           </p>
         </div>
       </div>
@@ -134,7 +138,7 @@ const AboutPage = () => {
           <div className="flex flex-col lg:flex-row items-center gap-12">
             <div className="lg:w-1/2">
               <img
-                src="/about-team.jpg"
+                src={team}
                 alt="FinTrak Team"
                 className="rounded-lg shadow-xl"
               />
@@ -144,7 +148,7 @@ const AboutPage = () => {
                 Our Story
               </h2>
               <p className="text-gray-700 mb-4">
-                FinTrak was founded in 2018 by a team of finance professionals
+                FinTrak was founded in 2024 by a team of finance professionals
                 and software engineers who experienced firsthand the
                 frustrations of managing company expenses through spreadsheets
                 and paper receipts.
@@ -163,7 +167,7 @@ const AboutPage = () => {
                 <div className="flex items-center">
                   <Building className="h-6 w-6 text-blue-600 mr-2" />
                   <span className="text-gray-900 font-medium">
-                    Headquartered in San Francisco
+                    Headquartered in Ahmedabad
                   </span>
                 </div>
                 <div className="flex items-center">
@@ -232,25 +236,25 @@ const AboutPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <TeamMember
-              image="/team-member-1.jpg"
-              name="Sarah Johnson"
+              image={profile}
+              name="Aryan Patel"
               title="CEO & Co-Founder"
               bio="Former fintech executive with 15+ years of experience in financial software."
             />
             <TeamMember
-              image="/team-member-2.jpg"
-              name="Michael Chen"
+              image={profile}
+              name="Brijesh Patel"
               title="CTO & Co-Founder"
               bio="Software architect with a background in secure financial systems and cloud infrastructure."
             />
             <TeamMember
-              image="/team-member-3.jpg"
-              name="David Rodriguez"
+              image={profile}
+              name="Jashpal Rajpurohit"
               title="Chief Product Officer"
               bio="Product leader passionate about creating intuitive user experiences."
             />
             <TeamMember
-              image="/team-member-4.jpg"
+              image={profile}
               name="Elena Patel"
               title="Chief Customer Officer"
               bio="Customer success expert focused on helping businesses optimize their expense workflows."

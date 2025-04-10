@@ -98,4 +98,31 @@ router.get('/policies', auth, adminAuth, async (req, res) => {
   }
 });
 
+// Fetch all users (accessible only by admin)
+router.get('/users', auth, adminAuth, async (req, res) => {
+  try {
+    const users = await User.find({ role: 'employee' }).select("-password");
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching users", error });
+  }
+});
+
+// Assign budget to a user
+router.put('/assign-budget/:userId', auth, adminAuth, async (req, res) => {
+  const { totalBudget } = req.body; // Example: { travel: 5000, meals: 2000, office: 3000 }
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.userId,
+      { totalBudget },
+      { new: true }
+    );
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.status(200).json({ message: 'Budget assigned successfully', user });
+  } catch (error) {
+    res.status(500).json({ message: 'Error assigning budget', error });
+  }
+});
+
 module.exports = router;

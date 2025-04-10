@@ -25,6 +25,9 @@ import {
 } from "lucide-react";
 import FooterHomepage from "./FooterHomepage";
 
+const ocrImage = require("./feature_ocr.jpeg");
+const profile = require("./profile.png");
+
 const FeaturesPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -238,7 +241,7 @@ const FeaturesPage = () => {
             </div>
             <div className="lg:w-1/2 bg-white p-4 rounded-lg shadow-lg">
               <img
-                src="/receipt-processing.svg"
+                src={ocrImage}
                 alt="Receipt Processing"
                 className="w-full rounded"
               />
@@ -346,7 +349,12 @@ const FeaturesPage = () => {
           <div className="max-w-4xl mx-auto bg-blue-50 rounded-xl p-8 md:p-12 shadow-md">
             <div className="flex flex-col md:flex-row">
               <div className="md:w-1/4 flex justify-center mb-6 md:mb-0">
-                <div className="w-24 h-24 bg-gray-300 rounded-full"></div>
+                {/* Replace with your image */}
+                <img
+                  src={profile}
+                  alt="Sarah Johnson"
+                  className="w-24 h-24 bg-gray-300 rounded-full object-cover"
+                />
               </div>
               <div className="md:w-3/4">
                 <p className="text-xl text-gray-700 italic mb-6">
@@ -385,7 +393,7 @@ const FeaturesPage = () => {
           </p>
         </div>
       </div>
-      <FooterHomepage/>
+      <FooterHomepage />
     </div>
   );
 };

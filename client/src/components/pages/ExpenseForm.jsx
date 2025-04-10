@@ -324,9 +324,9 @@ export default function ExpenseForm() {
           >
             {loading
               ? "Submitting..."
-              : ocrLoading
+              : (ocrLoading
               ? "Processing OCR..."
-              : "Submit Expense"}
+              : "Submit Expense")}
           </button>
         </div>
       </form>
