@@ -8,7 +8,7 @@ import {
   FaFileInvoiceDollar,
 } from "react-icons/fa";
 import { Wallet, ArrowRight, CheckCircle, Menu, X } from "lucide-react";
-import FooterHomepage from "./FooterHomepage";
+// import FooterHomepage from "./FooterHomepage";
 
 const Homepage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -26,13 +26,13 @@ const Homepage = () => {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-8">
-          <Link
+          {/* <Link
             to="/home"
             className="text-gray-600 hover:text-blue-600 transition"
           >
             Home
-          </Link>
-          <Link
+          </Link> */}
+          {/* <Link
             to="/features"
             className="text-gray-600 hover:text-blue-600 transition"
           >
@@ -49,18 +49,18 @@ const Homepage = () => {
             className="text-gray-600 hover:text-blue-600 transition"
           >
             About
-          </Link>
+          </Link> */}
           <div className="space-x-4">
             <Link to="/login">
               <button className="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition">
                 Login
               </button>
             </Link>
-            <Link to="/signup">
+            {/* <Link to="/signup">
               <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-md hover:shadow-lg">
                 Get Started
               </button>
-            </Link>
+            </Link> */}
           </div>
         </div>
 
@@ -74,7 +74,7 @@ const Homepage = () => {
       </nav>
 
       {/* Mobile Menu */}
-      {isMenuOpen && (
+      {/* {isMenuOpen && (
         <div className="md:hidden bg-white shadow-md p-4 absolute w-full z-40">
           <div className="flex flex-col space-y-4">
             <Link
@@ -109,7 +109,7 @@ const Homepage = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Hero Section */}
       <div className="container mx-auto px-6 py-16 lg:py-24">
@@ -131,22 +131,22 @@ const Homepage = () => {
               paperwork.
             </p>
             <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
-              <Link to="/signup">
+              {/* <Link to="/signup">
                 <button className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-md hover:shadow-lg flex items-center justify-center w-full sm:w-auto">
                   Start Free Trial
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </button>
-              </Link>
+              </Link> */}
               <Link to="/demo">
                 <button className="px-8 py-3 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition w-full sm:w-auto">
                   Watch Demo
                 </button>
               </Link>
             </div>
-            <div className="mt-8 flex items-center text-sm text-gray-500">
+            {/* <div className="mt-8 flex items-center text-sm text-gray-500">
               <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
               No credit card required for trial
-            </div>
+            </div> */}
           </div>
           <div className="lg:w-1/2 mt-10 lg:mt-0 transform hover:-translate-y-2 transition-transform duration-300">
             <div className="relative">
@@ -735,7 +735,7 @@ const Homepage = () => {
       </div>
 
       {/* Social Proof */}
-      <div className="bg-white py-12">
+      {/* <div className="bg-white py-12">
         <div className="container mx-auto px-6">
           <p className="text-center text-gray-500 mb-8">
             Trusted by 500+ companies worldwide
@@ -754,7 +754,7 @@ const Homepage = () => {
             ))}
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Features Section */}
       <div className="bg-gray-50 py-16">
@@ -804,7 +804,7 @@ const Homepage = () => {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-blue-600 py-16">
+      {/* <div className="bg-blue-600 py-16">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
             Ready to Transform Your Expense Management?
@@ -822,10 +822,10 @@ const Homepage = () => {
             14-day free trial. No credit card required.
           </p>
         </div>
-      </div>
+      </div> */}
 
       {/* Footer */}
-      <FooterHomepage />
+      {/* <FooterHomepage /> */}
     </div>
   );
 };

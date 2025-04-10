@@ -17,6 +17,7 @@ import {
   Cell,
 } from "recharts";
 import { Mistral } from "@mistralai/mistralai";
+import { ArrowTrendingUpIcon, ArrowTrendingDownIcon, CircleStackIcon, ClockIcon } from '@heroicons/react/24/outline';
 
 const apiKey = "hiirJwgJlEBEXxj7SlGS7fAsr27wocwr";
 
@@ -28,7 +29,6 @@ export default function Dashboard() {
   const [rejectedCount, setRejectedCount] = useState(0);
   const [recentExpenses, setRecentExpenses] = useState([]);
   const [userExpenses, setUserExpenses] = useState([]);
-  // const [remainingBudget, setRemainingBudget] = useState({});
   const [totalBudget, setTotalBudget] = useState(0);
   const [totalRemainingBudget, setTotalRemainingBudget] = useState(0);
   const [expensesByCategory, setExpensesByCategory] = useState([]);
@@ -37,21 +37,23 @@ export default function Dashboard() {
   const [topVendors, setTopVendors] = useState([]);
   const [animationActive, setAnimationActive] = useState(true);
   const [recommendation, setRecommendation] = useState("");
-  const [loadingRec, setLoadingRec] = useState(false); // optional: for loading state
+  const [loadingRec, setLoadingRec] = useState(false);
+  const [showRecommendation, setShowRecommendation] = useState(false);
 
   // Colors for charts
   const COLORS = [
-    "#0088FE",
-    "#00C49F",
-    "#FFBB28",
-    "#FF8042",
-    "#8884d8",
-    "#82ca9d",
+    "#3b82f6", // blue-500
+    "#10b981", // emerald-500
+    "#f59e0b", // amber-500
+    "#ef4444", // red-500
+    "#8b5cf6", // violet-500
+    "#06b6d4", // cyan-500
   ];
+  
   const STATUS_COLORS = {
-    pending: "#FFBB28",
-    approved: "#00C49F",
-    rejected: "#FF8042",
+    pending: "#f59e0b", // amber-500
+    approved: "#10b981", // emerald-500
+    rejected: "#ef4444", // red-500
   };
 
   useEffect(() => {
@@ -71,7 +73,6 @@ export default function Dashboard() {
           }
         );
         setUserData(user);
-        // setRemainingBudget(user.budget || {});
         setIsLoggedIn(true);
 
         // Calculate total budget
@@ -127,7 +128,7 @@ export default function Dashboard() {
         );
         setUserExpenses(expenses);
 
-        // Fetch expenses by category (new endpoint needed)
+        // Fetch expenses by category
         try {
           const { data: categoryData } = await axios.get(
             "http://localhost:8080/api/expenses/bycategory",
@@ -148,7 +149,7 @@ export default function Dashboard() {
           setExpensesByCategory(mockCategories);
         }
 
-        // Fetch expenses trend (new endpoint needed)
+        // Fetch expenses trend
         try {
           const { data: trendData } = await axios.get(
             "http://localhost:8080/api/expenses/trend",
@@ -243,6 +244,7 @@ export default function Dashboard() {
 
   const handleGetRecommendation = async () => {
     setLoadingRec(true);
+    setShowRecommendation(true);
     try {
       const rec = await generateBudgetRecommendation(
         totalRemainingBudget,
@@ -258,16 +260,8 @@ export default function Dashboard() {
   };
 
   const generateBudgetRecommendation = async (budget, expenses) => {
-    // const formattedExpenses = expenses.map(e => ({
-    //   category: e.category_id,
-    //   amount: e.amount
-    // }));
-
     const budgetText = JSON.stringify(budget);
     const historyText = JSON.stringify(expenses);
-
-    // console.log("budget",budget);
-    // console.log("expense",expenses);
     
     const client = new Mistral({ apiKey });
 
@@ -290,265 +284,305 @@ export default function Dashboard() {
     return chatResponse.choices[0].message.content;
   };
 
+  // Calculate budget usage percentage
+  const budgetUsagePercent = totalBudget ? ((totalBudget - totalRemainingBudget) / totalBudget) * 100 : 0;
+
   return (
     <>
       {isLoggedIn ? (
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold">
-              Welcome, {userData?.firstName}
+        <div className="space-y-6 max-w-7xl mx-auto px-4 py-6">
+          {/* Header with greeting and summary */}
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl shadow-lg p-6 md:p-8 text-white">
+            <h1 className="text-2xl md:text-3xl font-bold mb-4">
+              Welcome back, {userData?.firstName}!
             </h1>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6 mb-4">
-            <h2 className="text-xl font-semibold mb-2">
-              AI Budget Recommendation
-            </h2>
-            <button
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-              onClick={handleGetRecommendation}
-              disabled={loadingRec}
-            >
-              {loadingRec ? "Generating..." : "Get Recommendation"}
-            </button>
-
-            {recommendation && (
-              <pre className="text-sm text-gray-800 bg-gray-100 mt-4 p-4 rounded overflow-auto">
-                {recommendation}
-              </pre>
-            )}
-          </div>
-
-          {/* Total Budget and Total Remaining Budget */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Total Budget</h2>
-              <p className="text-3xl font-bold text-green-600">
-                ${totalBudget?.toFixed(2)}
-              </p>
+            <p className="text-blue-100 mb-6">Here's your financial snapshot for today.</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+              {/* Budget Summary Cards */}
+              <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
+                <div className="flex items-center mb-2">
+                  <CircleStackIcon className="h-5 w-5 mr-2" />
+                  <h3 className="font-semibold">Total Budget</h3>
+                </div>
+                <p className="text-2xl font-bold">${totalBudget?.toFixed(2)}</p>
+              </div>
+              
+              <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
+                <div className="flex items-center mb-2">
+                  <ClockIcon className="h-5 w-5 mr-2" />
+                  <h3 className="font-semibold">Remaining Budget</h3>
+                </div>
+                <p className="text-2xl font-bold">${totalRemainingBudget?.toFixed(2)}</p>
+              </div>
+              
+              <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
+                <div className="flex items-center mb-2">
+                  <ArrowTrendingUpIcon className="h-5 w-5 mr-2" />
+                  <h3 className="font-semibold">Approved</h3>
+                </div>
+                <p className="text-2xl font-bold">{approvedCount}</p>
+              </div>
+              
+              <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
+                <div className="flex items-center mb-2">
+                  <ArrowTrendingDownIcon className="h-5 w-5 mr-2" />
+                  <h3 className="font-semibold">Pending</h3>
+                </div>
+                <p className="text-2xl font-bold">{pendingCount}</p>
+              </div>
             </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">
-                Total Remaining Budget
-              </h2>
-              <p className="text-3xl font-bold text-blue-600">
-                ${totalRemainingBudget?.toFixed(2)}
-              </p>
+          </div>
+          
+          {/* Budget Progress Bar */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="text-lg font-semibold">Budget Usage</h2>
+              <span className="text-sm text-gray-500">{budgetUsagePercent.toFixed(1)}% Used</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div 
+                className="bg-blue-600 h-2.5 rounded-full" 
+                style={{ width: `${Math.min(budgetUsagePercent, 100)}%` }}
+              ></div>
             </div>
           </div>
 
           {/* Charts Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Chart 1: Expenses by Category (Pie Chart) */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">
-                Expenses by Category
-              </h2>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={expensesByCategory}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) =>
-                        `${name}: ${(percent * 100).toFixed(0)}%`
-                      }
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                      isAnimationActive={animationActive}
-                      animationDuration={2000}
-                      animationEasing="ease-out"
-                    >
-                      {expensesByCategory.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
-                  </PieChart>
-                </ResponsiveContainer>
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div className="border-b border-gray-200 px-6 py-4">
+                <h2 className="text-lg font-semibold">Expenses by Category</h2>
+              </div>
+              <div className="p-6">
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={expensesByCategory}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, percent }) =>
+                          `${name}: ${(percent * 100).toFixed(0)}%`
+                        }
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                        isAnimationActive={animationActive}
+                        animationDuration={1500}
+                        animationEasing="ease-out"
+                      >
+                        {expensesByCategory.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={COLORS[index % COLORS.length]}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
             </div>
 
             {/* Chart 2: Expenses Trend (Line Chart) */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Expenses Trend</h2>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={expensesTrend}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
-                    <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="amount"
-                      stroke="#8884d8"
-                      strokeWidth={2}
-                      isAnimationActive={animationActive}
-                      animationDuration={2000}
-                      animationEasing="ease-out"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div className="border-b border-gray-200 px-6 py-4">
+                <h2 className="text-lg font-semibold">Expenses Trend</h2>
+              </div>
+              <div className="p-6">
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart
+                      data={expensesTrend}
+                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="amount"
+                        stroke="#3b82f6"
+                        strokeWidth={2}
+                        dot={{ r: 4 }}
+                        activeDot={{ r: 6 }}
+                        isAnimationActive={animationActive}
+                        animationDuration={1500}
+                        animationEasing="ease-out"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
             </div>
 
             {/* Chart 3: Top Vendors (Bar Chart) */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Top Vendors</h2>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={topVendors}
-                    layout="vertical"
-                    margin={{ top: 5, right: 30, left: 60, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" />
-                    <YAxis dataKey="name" type="category" />
-                    <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
-                    <Legend />
-                    <Bar
-                      dataKey="value"
-                      fill="#82ca9d"
-                      isAnimationActive={animationActive}
-                      animationDuration={2000}
-                      animationEasing="ease-out"
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div className="border-b border-gray-200 px-6 py-4">
+                <h2 className="text-lg font-semibold">Top Vendors</h2>
+              </div>
+              <div className="p-6">
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={topVendors}
+                      layout="vertical"
+                      margin={{ top: 5, right: 30, left: 60, bottom: 5 }}
                     >
-                      {topVendors.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis type="number" />
+                      <YAxis dataKey="name" type="category" width={80} />
+                      <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+                      <Bar
+                        dataKey="value"
+                        isAnimationActive={animationActive}
+                        animationDuration={1500}
+                        animationEasing="ease-out"
+                        radius={[0, 4, 4, 0]}
+                      >
+                        {topVendors.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={COLORS[index % COLORS.length]}
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
             </div>
 
-            {/* Chart 4: Expenses by Status (Area Chart) */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Expenses by Status</h2>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={expensesByStatus}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      paddingAngle={5}
-                      dataKey="value"
-                      isAnimationActive={animationActive}
-                      animationDuration={2000}
-                      animationEasing="ease-out"
-                    >
-                      {expensesByStatus.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+            {/* Chart 4: Expenses by Status (Pie Chart) */}
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div className="border-b border-gray-200 px-6 py-4">
+                <h2 className="text-lg font-semibold">Expenses by Status</h2>
+              </div>
+              <div className="p-6">
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={expensesByStatus}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        paddingAngle={5}
+                        dataKey="value"
+                        isAnimationActive={animationActive}
+                        animationDuration={1500}
+                        animationEasing="ease-out"
+                      >
+                        {expensesByStatus.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Remaining Budget by Category */}
-          {/* <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4">Remaining Budget by Category</h2>
-            <ul className="divide-y divide-gray-200">
-              {Object.entries(remainingBudget).map(([category, amount]) => (
-                <li key={category} className="py-2 flex justify-between">
-                  <span className="font-medium text-gray-700">{category}</span>
-                  <span className="text-blue-600 font-semibold">${amount?.toFixed(2)}</span>
-                </li>
-              ))}
-            </ul>
-          </div> */}
-
-          {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-lg font-semibold mb-2">Pending Expenses</h2>
-              <p className="text-3xl font-bold text-blue-600">{pendingCount}</p>
+          {/* AI Budget Recommendation Section */}
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+              <h2 className="text-lg font-semibold">AI Budget Recommendation</h2>
+              <button
+                className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                  loadingRec 
+                    ? "bg-gray-200 text-gray-500 cursor-not-allowed" 
+                    : "bg-blue-600 text-white hover:bg-blue-700"
+                }`}
+                onClick={handleGetRecommendation}
+                disabled={loadingRec}
+              >
+                {loadingRec ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Generating...
+                  </span>
+                ) : (
+                  "Get Recommendation"
+                )}
+              </button>
             </div>
-
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-lg font-semibold mb-2">Approved Expenses</h2>
-              <p className="text-3xl font-bold text-green-600">
-                {approvedCount}
-              </p>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-lg font-semibold mb-2">Rejected Expenses</h2>
-              <p className="text-3xl font-bold text-red-600">{rejectedCount}</p>
-            </div>
+            {showRecommendation && (
+              <div className="p-6">
+                {loadingRec ? (
+                  <div className="flex justify-center items-center h-40">
+                    <div className="text-center">
+                      <div className="animate-pulse flex space-x-2 justify-center mb-2">
+                        <div className="h-2 w-2 bg-blue-600 rounded-full"></div>
+                        <div className="h-2 w-2 bg-blue-600 rounded-full"></div>
+                        <div className="h-2 w-2 bg-blue-600 rounded-full"></div>
+                      </div>
+                      <p className="text-gray-500">Analyzing your expenses and generating smart recommendations...</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 rounded-lg p-4 overflow-auto max-h-96">
+                    <pre className="text-sm text-gray-800 whitespace-pre-wrap font-mono">
+                      {recommendation}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
-          <div className="bg-white rounded-lg shadow">
-            <div className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Recent Expenses</h2>
+          {/* Recent Expenses - Re-enable if needed */}
+          {/* <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="border-b border-gray-200 px-6 py-4">
+              <h2 className="text-lg font-semibold">Recent Expenses</h2>
+            </div>
+            <div className="overflow-x-auto">
               {recentExpenses.length > 0 ? (
-                <ul className="divide-y divide-gray-200">
-                  {recentExpenses.map((expense) => (
-                    <li
-                      key={expense._id}
-                      className="py-4 flex justify-between items-center"
-                    >
-                      <div className="flex items-center space-x-4 flex-1">
-                        <div className="flex-1">
-                          <p className="text-lg font-semibold">
-                            {expense.vendor}
-                          </p>
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm text-gray-500">
-                            {expense.category_id}
-                          </p>
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm text-gray-500">
-                            {new Date(expense.date).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-blue-600">
-                            ${expense.amount.toFixed(2)}
-                          </p>
-                        </div>
-                      </div>
-                      <div>
-                        <span
-                          className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {recentExpenses.map((expense) => (
+                      <tr key={expense._id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{expense.vendor}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{expense.category_id}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(expense.date).toLocaleDateString()}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">${expense.amount.toFixed(2)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                             expense.status === "pending"
-                              ? "bg-yellow-100 text-yellow-600"
+                              ? "bg-yellow-100 text-yellow-800"
                               : expense.status === "approved"
-                              ? "bg-green-100 text-green-600"
-                              : "bg-red-100 text-red-600"
-                          }`}
-                        >
-                          {expense.status.charAt(0).toUpperCase() +
-                            expense.status.slice(1)}
-                        </span>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}>
+                            {expense.status.charAt(0).toUpperCase() + expense.status.slice(1)}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               ) : (
                 <div className="text-gray-500 text-center py-8">
                   No recent expenses found. Create your first expense claim!
@@ -558,11 +592,18 @@ export default function Dashboard() {
           </div> */}
         </div>
       ) : (
-        <li>
-          <Link to="/login" className="nav-links">
-            <i className="fa-solid fa-sign-in-alt"></i> Login
-          </Link>
-        </li>
+        <div className="flex items-center justify-center h-screen bg-gray-100">
+          <div className="bg-white p-8 rounded-lg shadow-md text-center">
+            <h2 className="text-2xl font-bold mb-4">You're not logged in</h2>
+            <p className="text-gray-600 mb-6">Please log in to access your dashboard</p>
+            <Link 
+              to="/login" 
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition flex items-center justify-center"
+            >
+              <i className="fa-solid fa-sign-in-alt mr-2"></i> Log In
+            </Link>
+          </div>
+        </div>
       )}
     </>
   );

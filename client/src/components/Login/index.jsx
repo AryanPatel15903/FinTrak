@@ -150,14 +150,14 @@ const Login = () => {
             </button>
           </form>
           
-          <div className="mt-6 text-center">
+          {/* <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Don't have an account?{" "}
               <Link to="/signup" className="text-blue-600 hover:text-blue-800 font-medium">
                 Create one
               </Link>
             </p>
-          </div>
+          </div> */}
         </div>
         
         {/* Right Side - Visual/CTA */}
@@ -183,11 +183,11 @@ const Login = () => {
               </div>
             </div>
             
-            <div className="mt-8">
+            {/* <div className="mt-8">
               <Link to="/signup" className="inline-flex items-center text-sm font-medium text-white hover:text-blue-200 transition">
                 Create a new Account <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
