@@ -1,10 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Link } from 'react-router-dom';
-import { 
-  BarChart, Bar, LineChart, Line, PieChart, Pie, 
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell
-} from 'recharts';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Link } from "react-router-dom";
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  Cell,
+} from "recharts";
+import { Mistral } from "@mistralai/mistralai";
+
+const apiKey = "hiirJwgJlEBEXxj7SlGS7fAsr27wocwr";
 
 export default function Dashboard() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -13,6 +27,7 @@ export default function Dashboard() {
   const [approvedCount, setApprovedCount] = useState(0);
   const [rejectedCount, setRejectedCount] = useState(0);
   const [recentExpenses, setRecentExpenses] = useState([]);
+  const [userExpenses, setUserExpenses] = useState([]);
   // const [remainingBudget, setRemainingBudget] = useState({});
   const [totalBudget, setTotalBudget] = useState(0);
   const [totalRemainingBudget, setTotalRemainingBudget] = useState(0);
@@ -21,28 +36,40 @@ export default function Dashboard() {
   const [expensesByStatus, setExpensesByStatus] = useState([]);
   const [topVendors, setTopVendors] = useState([]);
   const [animationActive, setAnimationActive] = useState(true);
+  const [recommendation, setRecommendation] = useState("");
+  const [loadingRec, setLoadingRec] = useState(false); // optional: for loading state
 
   // Colors for charts
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+  const COLORS = [
+    "#0088FE",
+    "#00C49F",
+    "#FFBB28",
+    "#FF8042",
+    "#8884d8",
+    "#82ca9d",
+  ];
   const STATUS_COLORS = {
-    pending: '#FFBB28',
-    approved: '#00C49F',
-    rejected: '#FF8042'
+    pending: "#FFBB28",
+    approved: "#00C49F",
+    rejected: "#FF8042",
   };
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         if (!token) {
           setIsLoggedIn(false);
           return;
         }
 
         // Fetch user data
-        const { data: user } = await axios.get('http://localhost:8080/api/users/me', {
-          headers: { 'x-auth-token': token },
-        });
+        const { data: user } = await axios.get(
+          "http://localhost:8080/api/users/me",
+          {
+            headers: { "x-auth-token": token },
+          }
+        );
         setUserData(user);
         // setRemainingBudget(user.budget || {});
         setIsLoggedIn(true);
@@ -51,105 +78,155 @@ export default function Dashboard() {
         setTotalBudget(user.totalBudget);
 
         // Calculate total remaining budget
-        const remaining = Object.values(user.budget || {}).reduce((sum, amount) => sum + amount, 0);
+        const remaining = Object.values(user.budget || {}).reduce(
+          (sum, amount) => sum + amount,
+          0
+        );
         setTotalRemainingBudget(remaining);
 
         // Fetch expense counts
-        const { data: pendingData } = await axios.get('http://localhost:8080/api/expenses/pendingcount', {
-          headers: { 'x-auth-token': token },
-        });
+        const { data: pendingData } = await axios.get(
+          "http://localhost:8080/api/expenses/pendingcount",
+          {
+            headers: { "x-auth-token": token },
+          }
+        );
         setPendingCount(pendingData.count);
 
-        const { data: approvedData } = await axios.get('http://localhost:8080/api/expenses/approvedcount', {
-          headers: { 'x-auth-token': token },
-        });
+        const { data: approvedData } = await axios.get(
+          "http://localhost:8080/api/expenses/approvedcount",
+          {
+            headers: { "x-auth-token": token },
+          }
+        );
         setApprovedCount(approvedData.count);
 
-        const { data: rejectedData } = await axios.get('http://localhost:8080/api/expenses/rejectedcount', {
-          headers: { 'x-auth-token': token },
-        });
+        const { data: rejectedData } = await axios.get(
+          "http://localhost:8080/api/expenses/rejectedcount",
+          {
+            headers: { "x-auth-token": token },
+          }
+        );
         setRejectedCount(rejectedData.count);
 
         // Fetch recent expenses
-        const { data: recent } = await axios.get('http://localhost:8080/api/expenses/recent', {
-          headers: { 'x-auth-token': token },
-        });
+        const { data: recent } = await axios.get(
+          "http://localhost:8080/api/expenses/recent",
+          {
+            headers: { "x-auth-token": token },
+          }
+        );
         setRecentExpenses(recent);
+
+        // Fetch expenses
+        const { data: expenses } = await axios.get(
+          "http://localhost:8080/api/expenses/myexpenses",
+          {
+            headers: { "x-auth-token": token },
+          }
+        );
+        setUserExpenses(expenses);
 
         // Fetch expenses by category (new endpoint needed)
         try {
-          const { data: categoryData } = await axios.get('http://localhost:8080/api/expenses/bycategory', {
-            headers: { 'x-auth-token': token },
-          });
+          const { data: categoryData } = await axios.get(
+            "http://localhost:8080/api/expenses/bycategory",
+            {
+              headers: { "x-auth-token": token },
+            }
+          );
           setExpensesByCategory(categoryData);
         } catch (err) {
-          console.error('Failed to fetch expenses by category', err);
+          console.error("Failed to fetch expenses by category", err);
           // Mock data for expenses by category
-          const mockCategories = Object.keys(user.budget || {}).map(category => ({
-            name: category,
-            value: Math.floor(Math.random() * 5000)
-          }));
+          const mockCategories = Object.keys(user.budget || {}).map(
+            (category) => ({
+              name: category,
+              value: Math.floor(Math.random() * 5000),
+            })
+          );
           setExpensesByCategory(mockCategories);
         }
 
         // Fetch expenses trend (new endpoint needed)
         try {
-          const { data: trendData } = await axios.get('http://localhost:8080/api/expenses/trend', {
-            headers: { 'x-auth-token': token },
-          });
+          const { data: trendData } = await axios.get(
+            "http://localhost:8080/api/expenses/trend",
+            {
+              headers: { "x-auth-token": token },
+            }
+          );
           setExpensesTrend(trendData);
         } catch (err) {
-          console.error('Failed to fetch expense trends', err);
+          console.error("Failed to fetch expense trends", err);
           // Mock data for expense trends
-          const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-          const mockTrend = months.map(month => ({
+          const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
+          const mockTrend = months.map((month) => ({
             name: month,
-            amount: Math.floor(Math.random() * 10000)
+            amount: Math.floor(Math.random() * 10000),
           }));
           setExpensesTrend(mockTrend);
         }
 
         // Set expenses by status
         setExpensesByStatus([
-          { name: 'Pending', value: pendingData.count, color: STATUS_COLORS.pending },
-          { name: 'Approved', value: approvedData.count, color: STATUS_COLORS.approved },
-          { name: 'Rejected', value: rejectedData.count, color: STATUS_COLORS.rejected }
+          {
+            name: "Pending",
+            value: pendingData.count,
+            color: STATUS_COLORS.pending,
+          },
+          {
+            name: "Approved",
+            value: approvedData.count,
+            color: STATUS_COLORS.approved,
+          },
+          {
+            name: "Rejected",
+            value: rejectedData.count,
+            color: STATUS_COLORS.rejected,
+          },
         ]);
 
         // Mock data for top vendors
         try {
-          const { data: vendorData } = await axios.get('http://localhost:8080/api/expenses/topvendors', {
-            headers: { 'x-auth-token': token },
-          });
+          const { data: vendorData } = await axios.get(
+            "http://localhost:8080/api/expenses/topvendors",
+            {
+              headers: { "x-auth-token": token },
+            }
+          );
           setTopVendors(vendorData);
         } catch (err) {
-          console.error('Failed to fetch top vendors', err);
+          console.error("Failed to fetch top vendors", err);
           // Create mock data based on recent expenses
           const vendorMap = {};
-          recent.forEach(expense => {
+          recent.forEach((expense) => {
             if (vendorMap[expense.vendor]) {
               vendorMap[expense.vendor] += expense.amount;
             } else {
               vendorMap[expense.vendor] = expense.amount;
             }
           });
-          
+
           const mockVendors = Object.entries(vendorMap)
             .map(([name, value]) => ({ name, value }))
             .sort((a, b) => b.value - a.value)
             .slice(0, 5);
-          
-          setTopVendors(mockVendors.length ? mockVendors : [
-            { name: 'Uber', value: 1200 },
-            { name: 'Amazon', value: 800 },
-            { name: 'Office Supplies', value: 600 },
-            { name: 'Travel Agency', value: 500 },
-            { name: 'Restaurants', value: 400 }
-          ]);
-        }
 
+          setTopVendors(
+            mockVendors.length
+              ? mockVendors
+              : [
+                  { name: "Uber", value: 1200 },
+                  { name: "Amazon", value: 800 },
+                  { name: "Office Supplies", value: 600 },
+                  { name: "Travel Agency", value: 500 },
+                  { name: "Restaurants", value: 400 },
+                ]
+          );
+        }
       } catch (err) {
-        console.error('Failed to fetch user data or expense counts', err);
+        console.error("Failed to fetch user data or expense counts", err);
         setIsLoggedIn(false);
       }
     };
@@ -164,23 +241,99 @@ export default function Dashboard() {
     return () => clearTimeout(animationTimer);
   }, []);
 
+  const handleGetRecommendation = async () => {
+    setLoadingRec(true);
+    try {
+      const rec = await generateBudgetRecommendation(
+        totalRemainingBudget,
+        userExpenses
+      );
+      setRecommendation(rec);
+    } catch (error) {
+      console.error("Error generating recommendation:", error);
+      setRecommendation("Failed to fetch recommendation. Try again.");
+    } finally {
+      setLoadingRec(false);
+    }
+  };
+
+  const generateBudgetRecommendation = async (budget, expenses) => {
+    // const formattedExpenses = expenses.map(e => ({
+    //   category: e.category_id,
+    //   amount: e.amount
+    // }));
+
+    const budgetText = JSON.stringify(budget);
+    const historyText = JSON.stringify(expenses);
+
+    // console.log("budget",budget);
+    // console.log("expense",expenses);
+    
+    const client = new Mistral({ apiKey });
+
+    const chatResponse = await client.chat.complete({
+      model: "mistral-small-latest",
+      messages: [
+        {
+          role: "user",
+          content: `You are a budget advisor. The user has a total remaining budget of ${budgetText}. Here is the user's past expense history: ${historyText}. 
+          Based on the spending patterns:
+          - Suggest how the user can allocate the remaining budget across different categories.
+          - Give higher recommendations to categories where the user has spent less in the past.
+          - Give lower recommendations to categories where the user has already spent a lot.
+          - Give recommendation in such way that whole remaining budget utilize.
+          Return the recommendation as a Table format with category names and recommended spending amounts. The total of all recommended amounts should not exceed the total remaining budget. Only return the Table, no extra text.`,
+        },
+      ],
+    });
+
+    return chatResponse.choices[0].message.content;
+  };
+
   return (
     <>
       {isLoggedIn ? (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold">Welcome, {userData?.firstName}</h1>
+            <h1 className="text-2xl font-bold">
+              Welcome, {userData?.firstName}
+            </h1>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6 mb-4">
+            <h2 className="text-xl font-semibold mb-2">
+              AI Budget Recommendation
+            </h2>
+            <button
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+              onClick={handleGetRecommendation}
+              disabled={loadingRec}
+            >
+              {loadingRec ? "Generating..." : "Get Recommendation"}
+            </button>
+
+            {recommendation && (
+              <pre className="text-sm text-gray-800 bg-gray-100 mt-4 p-4 rounded overflow-auto">
+                {recommendation}
+              </pre>
+            )}
           </div>
 
           {/* Total Budget and Total Remaining Budget */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-semibold mb-4">Total Budget</h2>
-              <p className="text-3xl font-bold text-green-600">${totalBudget?.toFixed(2)}</p>
+              <p className="text-3xl font-bold text-green-600">
+                ${totalBudget?.toFixed(2)}
+              </p>
             </div>
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Total Remaining Budget</h2>
-              <p className="text-3xl font-bold text-blue-600">${totalRemainingBudget?.toFixed(2)}</p>
+              <h2 className="text-xl font-semibold mb-4">
+                Total Remaining Budget
+              </h2>
+              <p className="text-3xl font-bold text-blue-600">
+                ${totalRemainingBudget?.toFixed(2)}
+              </p>
             </div>
           </div>
 
@@ -188,7 +341,9 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Chart 1: Expenses by Category (Pie Chart) */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Expenses by Category</h2>
+              <h2 className="text-xl font-semibold mb-4">
+                Expenses by Category
+              </h2>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -197,7 +352,9 @@ export default function Dashboard() {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent }) =>
+                        `${name}: ${(percent * 100).toFixed(0)}%`
+                      }
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
@@ -206,7 +363,10 @@ export default function Dashboard() {
                       animationEasing="ease-out"
                     >
                       {expensesByCategory.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
                       ))}
                     </Pie>
                     <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
@@ -266,7 +426,10 @@ export default function Dashboard() {
                       animationEasing="ease-out"
                     >
                       {topVendors.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
                       ))}
                     </Bar>
                   </BarChart>
@@ -318,7 +481,7 @@ export default function Dashboard() {
             </ul>
           </div> */}
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white p-6 rounded-lg shadow">
               <h2 className="text-lg font-semibold mb-2">Pending Expenses</h2>
               <p className="text-3xl font-bold text-blue-600">{pendingCount}</p>
@@ -326,7 +489,9 @@ export default function Dashboard() {
 
             <div className="bg-white p-6 rounded-lg shadow">
               <h2 className="text-lg font-semibold mb-2">Approved Expenses</h2>
-              <p className="text-3xl font-bold text-green-600">{approvedCount}</p>
+              <p className="text-3xl font-bold text-green-600">
+                {approvedCount}
+              </p>
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow">
@@ -341,13 +506,20 @@ export default function Dashboard() {
               {recentExpenses.length > 0 ? (
                 <ul className="divide-y divide-gray-200">
                   {recentExpenses.map((expense) => (
-                    <li key={expense._id} className="py-4 flex justify-between items-center">
+                    <li
+                      key={expense._id}
+                      className="py-4 flex justify-between items-center"
+                    >
                       <div className="flex items-center space-x-4 flex-1">
                         <div className="flex-1">
-                          <p className="text-lg font-semibold">{expense.vendor}</p>
+                          <p className="text-lg font-semibold">
+                            {expense.vendor}
+                          </p>
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm text-gray-500">{expense.category_id}</p>
+                          <p className="text-sm text-gray-500">
+                            {expense.category_id}
+                          </p>
                         </div>
                         <div className="flex-1">
                           <p className="text-sm text-gray-500">
@@ -355,20 +527,23 @@ export default function Dashboard() {
                           </p>
                         </div>
                         <div className="flex-1">
-                          <p className="text-blue-600">${expense.amount.toFixed(2)}</p>
+                          <p className="text-blue-600">
+                            ${expense.amount.toFixed(2)}
+                          </p>
                         </div>
                       </div>
                       <div>
                         <span
                           className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                            expense.status === 'pending'
-                              ? 'bg-yellow-100 text-yellow-600'
-                              : expense.status === 'approved'
-                              ? 'bg-green-100 text-green-600'
-                              : 'bg-red-100 text-red-600'
+                            expense.status === "pending"
+                              ? "bg-yellow-100 text-yellow-600"
+                              : expense.status === "approved"
+                              ? "bg-green-100 text-green-600"
+                              : "bg-red-100 text-red-600"
                           }`}
                         >
-                          {expense.status.charAt(0).toUpperCase() + expense.status.slice(1)}
+                          {expense.status.charAt(0).toUpperCase() +
+                            expense.status.slice(1)}
                         </span>
                       </div>
                     </li>
@@ -380,7 +555,7 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
-          </div>
+          </div> */}
         </div>
       ) : (
         <li>
