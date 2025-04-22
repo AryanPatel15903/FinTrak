@@ -79,11 +79,7 @@ export default function Dashboard() {
         setTotalBudget(user.totalBudget);
 
         // Calculate total remaining budget
-        const remaining = Object.values(user.budget || {}).reduce(
-          (sum, amount) => sum + amount,
-          0
-        );
-        setTotalRemainingBudget(remaining);
+        setTotalRemainingBudget(user.remainingBudget);
 
         // Fetch expense counts
         const { data: pendingData } = await axios.get(

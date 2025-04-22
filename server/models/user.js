@@ -14,12 +14,8 @@ const userSchema = new mongoose.Schema({
     enum: ["employee", "manager", "admin"],
     default: "employee"  // By default, new users are employees
   },
-  // budget: {
-  //   type: Map,
-  //   of: Number, // Example: { travel: 5000, meals: 2000, office: 3000 }
-  //   default: {},
-  // },
   totalBudget: { type: Number , default: 0},
+  remainingBudget: { type: Number , default: 0},
 });
 
 userSchema.methods.generateAuthToken = function () {

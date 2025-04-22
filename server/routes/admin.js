@@ -114,7 +114,7 @@ router.put('/assign-budget/:userId', auth, adminAuth, async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(
       req.params.userId,
-      { totalBudget },
+      { totalBudget, remainingBudget: totalBudget },
       { new: true }
     );
     if (!user) return res.status(404).json({ message: 'User not found' });
