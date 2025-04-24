@@ -3,21 +3,21 @@ import { Route, Routes, Navigate, Outlet } from "react-router-dom";
 import Signup from "./components/Singup";
 import Login from "./components/Login";
 import Layout from "./components/Layout";
-import Dashboard from "./components/pages/Dashboard";
-import ExpenseForm from "./components/pages/ExpenseForm";
-import MyExpenses from "./components/pages/MyExpenses";
-import AdminDashboard from "./components/pages/AdminDashboard";
-import ManagerDashboard from "./components/pages/ManagerDashboard";
-import EmployeeExpenses from "./components/pages/EmployeeExpenses";
+import Dashboard from "./components/pages/Employee/Dashboard";
+import ExpenseForm from "./components/pages/Employee/ExpenseForm";
+import MyExpenses from "./components/pages/Employee/MyExpenses";
+import AdminDashboard from "./components/pages/Admin/AdminDashboard";
+import ManagerDashboard from "./components/pages/Manager/ManagerDashboard";
+import EmployeeExpenses from "./components/pages/Manager/EmployeeExpenses";
 import Homepage from "./components/Homepage"; // Import the new Homepage component
 import FeaturesPage from "./components/FeaturesPage";
 import PricingPage from './components/PricingPage';
 import AboutPage from './components/AboutPage';
 import Mistral from './components/pages/Mistral_Testing';
 
-import AssignBudget from './components/pages/AssignBudget';
-import AssignManager from './components/pages/AssignManager';
-import PolicyManagement from './components/pages/PolicyManagement';
+import AssignBudget from './components/pages/Admin/AssignBudget';
+import AssignManager from './components/pages/Admin/AssignManager';
+import PolicyManagement from './components/pages/Admin/PolicyManagement';
 
 // Protected Route Component
 const ProtectedRoute = () => {
