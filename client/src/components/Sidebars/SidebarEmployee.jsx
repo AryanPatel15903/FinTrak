@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, PlusCircle, FileText, Settings } from 'lucide-react';
 
-export default function Sidebar() {
+export default function SidebarEmployee() {
   const location = useLocation();
 
   const isActive = (path) => location.pathname === path;

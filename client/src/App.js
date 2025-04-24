@@ -16,6 +16,8 @@ import AboutPage from './components/AboutPage';
 import Mistral from './components/pages/Mistral_Testing';
 
 import AssignBudget from './components/pages/AssignBudget';
+import AssignManager from './components/pages/AssignManager';
+import PolicyManagement from './components/pages/PolicyManagement';
 
 // Protected Route Component
 const ProtectedRoute = () => {
@@ -66,7 +68,9 @@ function App() {
                     {userRole === 'admin' && (
                         <>
                             <Route path="admin" element={<AdminDashboard />} />
+                            <Route path="/admin/assign-manager" element={<AssignManager />} />
                             <Route path="/admin/assign-budget" element={<AssignBudget />} />
+                            <Route path="/admin/policy-management" element={<PolicyManagement />} />
                         </>
                     )}
                     
