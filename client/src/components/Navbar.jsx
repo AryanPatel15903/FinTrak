@@ -4,6 +4,8 @@ import { Wallet, LogOut } from 'lucide-react';
 import { useState,useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
+// import FinTrak from "../assests/logo_final.png";
+import profile from "../assests/profile.png";
 
 export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -52,14 +54,18 @@ export default function Navbar() {
               <span className="text-xl font-bold text-gray-800 hover:text-blue-600 transition-colors">
                 FinTrak
               </span>
+              {/* <img src={FinTrak} alt="FinTrak" className='w-40'/> */}
             </Link>
           </div>
 
           {isLoggedIn ? (
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <div className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-semibold">
+                {/* <div className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-semibold">
                   {userData.firstName[0].toUpperCase()}
+                </div> */}
+                <div className="w-12 h-12 rounded-full flex items-center justify-center">
+                  <img src={profile} alt="profile" />
                 </div>
                 <span className="text-gray-700 font-medium">
                   {userData.firstName}
