@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema({
   },
   totalBudget: { type: Number , default: 0},
   remainingBudget: { type: Number , default: 0},
+  createdAt: { type: Date, default: Date.now },
 });
 
 userSchema.methods.generateAuthToken = function () {
