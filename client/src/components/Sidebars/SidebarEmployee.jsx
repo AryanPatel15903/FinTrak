@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, PlusCircle, FileText, Settings } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, FileText, ThumbsUp, Settings } from 'lucide-react';
 
 export default function SidebarEmployee() {
   const location = useLocation();
@@ -11,6 +11,7 @@ export default function SidebarEmployee() {
     { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/expenses/new', icon: PlusCircle, label: 'New Expense' },
     { to: '/expenses', icon: FileText, label: 'My Expenses' },
+    { to: '/recommendation', icon: ThumbsUp, label: 'Recommendation' },
     { to: '/settings', icon: Settings, label: 'Settings' },
   ];
 

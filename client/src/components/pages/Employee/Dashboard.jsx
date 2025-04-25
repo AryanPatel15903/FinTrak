@@ -16,10 +16,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
-import { Mistral } from "@mistralai/mistralai";
 import { ArrowTrendingUpIcon, ArrowTrendingDownIcon, CircleStackIcon, ClockIcon } from '@heroicons/react/24/outline';
-
-const apiKey = "hiirJwgJlEBEXxj7SlGS7fAsr27wocwr";
 
 export default function Dashboard() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -36,9 +33,6 @@ export default function Dashboard() {
   const [expensesByStatus, setExpensesByStatus] = useState([]);
   const [topVendors, setTopVendors] = useState([]);
   const [animationActive, setAnimationActive] = useState(true);
-  const [recommendation, setRecommendation] = useState("");
-  const [loadingRec, setLoadingRec] = useState(false);
-  const [showRecommendation, setShowRecommendation] = useState(false);
 
   // Colors for charts
   const COLORS = [
@@ -237,48 +231,6 @@ export default function Dashboard() {
 
     return () => clearTimeout(animationTimer);
   }, []);
-
-  const handleGetRecommendation = async () => {
-    setLoadingRec(true);
-    setShowRecommendation(true);
-    try {
-      const rec = await generateBudgetRecommendation(
-        totalRemainingBudget,
-        userExpenses
-      );
-      setRecommendation(rec);
-    } catch (error) {
-      console.error("Error generating recommendation:", error);
-      setRecommendation("Failed to fetch recommendation. Try again.");
-    } finally {
-      setLoadingRec(false);
-    }
-  };
-
-  const generateBudgetRecommendation = async (budget, expenses) => {
-    const budgetText = JSON.stringify(budget);
-    const historyText = JSON.stringify(expenses);
-    
-    const client = new Mistral({ apiKey });
-
-    const chatResponse = await client.chat.complete({
-      model: "mistral-small-latest",
-      messages: [
-        {
-          role: "user",
-          content: `You are a budget advisor. The user has a total remaining budget of ${budgetText}. Here is the user's past expense history: ${historyText}. 
-          Based on the spending patterns:
-          - Suggest how the user can allocate the remaining budget across different categories.
-          - Give higher recommendations to categories where the user has spent less in the past.
-          - Give lower recommendations to categories where the user has already spent a lot.
-          - Give recommendation in such way that whole remaining budget utilize.
-          Return the recommendation as a Table format with category names and recommended spending amounts. The total of all recommended amounts should not exceed the total remaining budget. Only return the Table, no extra text.`,
-        },
-      ],
-    });
-
-    return chatResponse.choices[0].message.content;
-  };
 
   // Calculate budget usage percentage
   const budgetUsagePercent = totalBudget ? ((totalBudget - totalRemainingBudget) / totalBudget) * 100 : 0;
@@ -489,103 +441,6 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-
-          {/* AI Budget Recommendation Section */}
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-              <h2 className="text-lg font-semibold">AI Budget Recommendation</h2>
-              <button
-                className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                  loadingRec 
-                    ? "bg-gray-200 text-gray-500 cursor-not-allowed" 
-                    : "bg-blue-600 text-white hover:bg-blue-700"
-                }`}
-                onClick={handleGetRecommendation}
-                disabled={loadingRec}
-              >
-                {loadingRec ? (
-                  <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Generating...
-                  </span>
-                ) : (
-                  "Get Recommendation"
-                )}
-              </button>
-            </div>
-            {showRecommendation && (
-              <div className="p-6">
-                {loadingRec ? (
-                  <div className="flex justify-center items-center h-40">
-                    <div className="text-center">
-                      <div className="animate-pulse flex space-x-2 justify-center mb-2">
-                        <div className="h-2 w-2 bg-blue-600 rounded-full"></div>
-                        <div className="h-2 w-2 bg-blue-600 rounded-full"></div>
-                        <div className="h-2 w-2 bg-blue-600 rounded-full"></div>
-                      </div>
-                      <p className="text-gray-500">Analyzing your expenses and generating smart recommendations...</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-gray-50 rounded-lg p-4 overflow-auto max-h-96">
-                    <pre className="text-sm text-gray-800 whitespace-pre-wrap font-mono">
-                      {recommendation}
-                    </pre>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Recent Expenses - Re-enable if needed */}
-          {/* <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="border-b border-gray-200 px-6 py-4">
-              <h2 className="text-lg font-semibold">Recent Expenses</h2>
-            </div>
-            <div className="overflow-x-auto">
-              {recentExpenses.length > 0 ? (
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {recentExpenses.map((expense) => (
-                      <tr key={expense._id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{expense.vendor}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{expense.category_id}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(expense.date).toLocaleDateString()}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">${expense.amount.toFixed(2)}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            expense.status === "pending"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : expense.status === "approved"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                          }`}>
-                            {expense.status.charAt(0).toUpperCase() + expense.status.slice(1)}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : (
-                <div className="text-gray-500 text-center py-8">
-                  No recent expenses found. Create your first expense claim!
-                </div>
-              )}
-            </div>
-          </div> */}
         </div>
       ) : (
         <div className="flex items-center justify-center h-screen bg-gray-100">

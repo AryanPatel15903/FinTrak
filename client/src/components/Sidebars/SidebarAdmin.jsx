@@ -1,6 +1,12 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, PlusCircle, FileText, Settings } from 'lucide-react';
+import { 
+  LayoutDashboard, 
+  Users, 
+  UserCog, 
+  FileText, 
+  Settings 
+} from 'lucide-react';
 
 export default function SidebarAdmin() {
   const location = useLocation();
@@ -9,8 +15,8 @@ export default function SidebarAdmin() {
 
   const links = [
     { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/admin/assign-budget', icon: Settings, label: 'Employees' },
-    { to: '/admin/assign-manager', icon: PlusCircle, label: 'Managers' },
+    { to: '/admin/assign-budget', icon: Users, label: 'Employees' },
+    { to: '/admin/assign-manager', icon: UserCog, label: 'Managers' },
     { to: '/admin/policy-management', icon: FileText, label: 'Policy Management' },
     { to: '/settings', icon: Settings, label: 'Settings' },
   ];

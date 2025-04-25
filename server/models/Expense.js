@@ -10,6 +10,7 @@ const expenseSchema = new mongoose.Schema({
   notes: { type: String },
   status: { type: String, default: 'pending' }, // Status of the expense (e.g., 'pending', 'approved', 'rejected')
   submission_date: { type: Date, default: Date.now }, // Submission date, default is current date/time
+  payment: {type: Boolean, default: false},
 });
 
 // Create the model

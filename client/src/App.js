@@ -6,6 +6,7 @@ import Layout from "./components/Layout";
 import Dashboard from "./components/pages/Employee/Dashboard";
 import ExpenseForm from "./components/pages/Employee/ExpenseForm";
 import MyExpenses from "./components/pages/Employee/MyExpenses";
+import Recommendation from "./components/pages/Employee/Recommendation";
 import AdminDashboard from "./components/pages/Admin/AdminDashboard";
 import ManagerDashboard from "./components/pages/Manager/ManagerDashboard";
 import EmployeeExpenses from "./components/pages/Manager/EmployeeExpenses";
@@ -64,6 +65,7 @@ function App() {
                     <Route index element={getDashboardByRole()} />
                     <Route path="expenses/new" element={<ExpenseForm />} /> {/* Changed to relative path */}
                     <Route path="expenses" element={<MyExpenses />} /> {/* Changed to relative path */}
+                    <Route path="recommendation" element={<Recommendation />} /> {/* Changed to relative path */}
                     
                     {userRole === 'admin' && (
                         <>
