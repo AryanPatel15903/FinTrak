@@ -16,7 +16,13 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
-import { ArrowTrendingUpIcon, ArrowTrendingDownIcon, CircleStackIcon, ClockIcon } from '@heroicons/react/24/outline';
+import {
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  CircleStackIcon,
+  ClockIcon,
+} from "@heroicons/react/24/outline";
+import { IndianRupee } from "lucide-react";
 
 export default function Dashboard() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -43,7 +49,7 @@ export default function Dashboard() {
     "#8b5cf6", // violet-500
     "#06b6d4", // cyan-500
   ];
-  
+
   const STATUS_COLORS = {
     pending: "#f59e0b", // amber-500
     approved: "#10b981", // emerald-500
@@ -233,7 +239,9 @@ export default function Dashboard() {
   }, []);
 
   // Calculate budget usage percentage
-  const budgetUsagePercent = totalBudget ? ((totalBudget - totalRemainingBudget) / totalBudget) * 100 : 0;
+  const budgetUsagePercent = totalBudget
+    ? ((totalBudget - totalRemainingBudget) / totalBudget) * 100
+    : 0;
 
   return (
     <>
@@ -244,8 +252,10 @@ export default function Dashboard() {
             <h1 className="text-2xl md:text-3xl font-bold mb-4">
               Welcome back, {userData?.firstName}!
             </h1>
-            <p className="text-blue-100 mb-6">Here's your financial snapshot for today.</p>
-            
+            <p className="text-blue-100 mb-6">
+              Here's your financial snapshot for today.
+            </p>
+
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
               {/* Budget Summary Cards */}
               <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
@@ -253,17 +263,23 @@ export default function Dashboard() {
                   <CircleStackIcon className="h-5 w-5 mr-2" />
                   <h3 className="font-semibold">Total Budget</h3>
                 </div>
-                <p className="text-2xl font-bold">${totalBudget?.toFixed(2)}</p>
+                <p className="text-2xl font-bold">
+                  <IndianRupee className="h-5 w-5 inline-block mr-1" />
+                  {totalBudget?.toFixed(2)}
+                </p>
               </div>
-              
+
               <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
                 <div className="flex items-center mb-2">
                   <ClockIcon className="h-5 w-5 mr-2" />
                   <h3 className="font-semibold">Remaining Budget</h3>
                 </div>
-                <p className="text-2xl font-bold">${totalRemainingBudget?.toFixed(2)}</p>
+                <p className="text-2xl font-bold">
+                  <IndianRupee className="h-5 w-5 inline-block mr-1" />
+                  {totalRemainingBudget?.toFixed(2)}
+                </p>
               </div>
-              
+
               <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
                 <div className="flex items-center mb-2">
                   <ArrowTrendingUpIcon className="h-5 w-5 mr-2" />
@@ -271,7 +287,7 @@ export default function Dashboard() {
                 </div>
                 <p className="text-2xl font-bold">{approvedCount}</p>
               </div>
-              
+
               <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
                 <div className="flex items-center mb-2">
                   <ArrowTrendingDownIcon className="h-5 w-5 mr-2" />
@@ -281,16 +297,18 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-          
+
           {/* Budget Progress Bar */}
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex justify-between items-center mb-2">
               <h2 className="text-lg font-semibold">Budget Usage</h2>
-              <span className="text-sm text-gray-500">{budgetUsagePercent.toFixed(1)}% Used</span>
+              <span className="text-sm text-gray-500">
+                {budgetUsagePercent.toFixed(1)}% Used
+              </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2.5">
-              <div 
-                className="bg-blue-600 h-2.5 rounded-full" 
+              <div
+                className="bg-blue-600 h-2.5 rounded-full"
                 style={{ width: `${Math.min(budgetUsagePercent, 100)}%` }}
               ></div>
             </div>
@@ -329,7 +347,7 @@ export default function Dashboard() {
                           />
                         ))}
                       </Pie>
-                      <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+                      <Tooltip formatter={(value) => `₹${value.toFixed(2)}`} />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
@@ -351,7 +369,7 @@ export default function Dashboard() {
                       <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                       <XAxis dataKey="name" />
                       <YAxis />
-                      <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+                      <Tooltip formatter={(value) => `₹${value.toFixed(2)}`} />
                       <Legend />
                       <Line
                         type="monotone"
@@ -386,7 +404,7 @@ export default function Dashboard() {
                       <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                       <XAxis type="number" />
                       <YAxis dataKey="name" type="category" width={80} />
-                      <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+                      <Tooltip formatter={(value) => `₹${value.toFixed(2)}`} />
                       <Bar
                         dataKey="value"
                         isAnimationActive={animationActive}
@@ -446,9 +464,11 @@ export default function Dashboard() {
         <div className="flex items-center justify-center h-screen bg-gray-100">
           <div className="bg-white p-8 rounded-lg shadow-md text-center">
             <h2 className="text-2xl font-bold mb-4">You're not logged in</h2>
-            <p className="text-gray-600 mb-6">Please log in to access your dashboard</p>
-            <Link 
-              to="/login" 
+            <p className="text-gray-600 mb-6">
+              Please log in to access your dashboard
+            </p>
+            <Link
+              to="/login"
               className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition flex items-center justify-center"
             >
               <i className="fa-solid fa-sign-in-alt mr-2"></i> Log In
