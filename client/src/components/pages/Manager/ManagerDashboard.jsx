@@ -218,7 +218,7 @@ export default function ManagerDashboard() {
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-yellow-500">
+            {/* <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-yellow-500">
               <h2 className="text-lg font-medium text-gray-600 mb-2">
                 Pending Expenses
               </h2>
@@ -241,7 +241,7 @@ export default function ManagerDashboard() {
                 </span>
                 <IndianRupee className="h-8 w-8 ml-auto text-green-500 opacity-75" />
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Employees List */}

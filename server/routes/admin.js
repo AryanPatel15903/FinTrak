@@ -400,7 +400,7 @@ router.get("/recent-activities", auth, adminAuth, async (req, res) => {
     // console.log("Fetching recent activities...");
     const expenses = await Expense.find()
       .sort({ submission_date: -1 }) // Use submission_date for sorting
-      .limit(6);
+      .limit(5);
 
     // console.log("Expenses found:", expenses.length);
     if (!expenses || expenses.length === 0) {
