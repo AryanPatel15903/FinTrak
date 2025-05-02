@@ -134,6 +134,45 @@ router.put("/assign-budget/:userId", auth, adminAuth, async (req, res) => {
   }
 });
 
+// Route for admin to add an employee
+router.post("/addEmployee", auth, adminAuth, async (req, res) => {
+  try {
+    const employeeData = { ...req.body, role: "employee" };
+    const { error } = validate(employeeData);
+    if (error)
+      return res.status(400).send({ message: error.details[0].message });
+
+    let user = await User.findOne({ email: employeeData.email });
+    if (user)
+      return res
+        .status(409)
+        .send({ message: "User with given email already exists!" });
+
+    const salt = await bcrypt.genSalt(Number(process.env.SALT));
+    const hashPassword = await bcrypt.hash(employeeData.password, salt);
+
+    user = new User({ ...employeeData, password: hashPassword });
+    await user.save();
+    res.status(201).send({ message: "Employee added successfully" });
+  } catch (error) {
+    res.status(500).send({ message: "Internal Server Error" });
+  }
+});
+
+// Route for admin to delete an employee
+router.delete("/deleteEmployee/:id", auth, adminAuth, async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) {
+      return res.status(404).send({ message: "Employee not found" });
+    }
+    res.status(200).send({ message: "Employee deleted successfully" });
+  } catch (error) {
+    res.status(500).send({ message: "Internal Server Error" });
+  }
+});
+
+
 // Stats Overview
 router.get("/stats-overview", auth, adminAuth, async (req, res) => {
   try {
